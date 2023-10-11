@@ -139,7 +139,6 @@ def main():
 
     except KeyboardInterrupt:
         shutil.rmtree(temp_dir)
-        input("Drücke ENTER zum beenden...")
         exit(0)
 
 
