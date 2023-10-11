@@ -9,7 +9,6 @@ import shutil
 import os
 import distutils.dir_util
 from lxml import etree as et
-from termcolor import colored
 
 #    Tiroler_Weißenbachtal installer
 
@@ -21,6 +20,7 @@ from termcolor import colored
 #
 #    History:	v1.0 @08.10.2023 - Initial implementation
 #                --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 def download(url, file):
     r = requests.get(url, allow_redirects=True, stream=True)
@@ -39,95 +39,109 @@ def download(url, file):
     f.close()
     return file
 
-def main():
-    print("Tiroler Weißenbachtal v1.0 installer by [LSFM] Bone2510")
-    print("\nLade FS22_Tiroler_Weißenbachtal von https://www.heimahd.com herunter...")
 
+def main():
     temp_dir = Path(tempfile.mkdtemp())
 
-    #print("Temp Path: " + temp_dir.__str__())
+    try:
+        print("Tiroler Weißenbachtal v1.0 installer by [LSFM] Bone2510")
+        print("\nLade FS22_Tiroler_Weißenbachtal von https://www.heimahd.com herunter...")
 
-    url="https://www.heimahd.com/assets/downloads/FS22_Tiroler_Weissenbachtal.zip?"
-    mapPath = download(url, temp_dir / "FS22_Tiroler_Weissenbachtal.zip")
+        # print("Temp Path: " + temp_dir.__str__())
 
-    selectValid = False
-    url2 = None
-    while not selectValid:
-        print("\n")
-        print("Welche Fahrzeuge möchtest du verwenden?")
-        print("\t 1. Standard LS22 Fahrzeuge")
-        print("\t 2. Hay and Forage Fahrzeuge (Hay and Forage DLC wird benötigt)")
+        url = "https://www.heimahd.com/assets/downloads/FS22_Tiroler_Weissenbachtal.zip?"
+        mapPath = download(url, temp_dir / "FS22_Tiroler_Weissenbachtal.zip")
 
-        defaultVehicleIndex = int(input("Auswahl: "))
+        selectValid = False
+        url2 = None
+        while not selectValid:
+            print("\n")
+            print("Welche Fahrzeuge möchtest du verwenden?")
+            print("\t 1. Standard LS22 Fahrzeuge")
+            print("\t 2. Hay and Forage Fahrzeuge (Hay and Forage DLC wird benötigt)")
 
-        if defaultVehicleIndex > 0 and defaultVehicleIndex < 3:
-            selectValid = True
+            index = input("Auswahl [Zahl]: ")
 
-            if defaultVehicleIndex == 1:
-                url2="https://cloud.bayerngamers.de/index.php/s/Q9Y3xGt4gZK5RrC/download/placeables_vehicles.zip"
+            if not index.isdigit():
+                continue
 
-            elif defaultVehicleIndex == 2:
-                url2 = "https://cloud.bayerngamers.de/index.php/s/tiwz5qD4cH385j5/download/placeables_vehicles_Hey_and_forage.zip"
+            else:
+                defaultVehicleIndex = int(index)
 
-    if url2 is None:
-        print("Fehler: URL für defaultVehicle.xml nicht gesetzt!")
+            if defaultVehicleIndex > 0 and defaultVehicleIndex < 3:
+                selectValid = True
 
-    print("\nDownloading defaultVehicle.xml.")
-    defaultVehiclePath = download(url2, temp_dir / "defaultVehicles.zip")
+                if defaultVehicleIndex == 1:
+                    url2 = "https://cloud.bayerngamers.de/index.php/s/Q9Y3xGt4gZK5RrC/download/placeables_vehicles.zip"
 
-    mapDir = temp_dir / "FS22_Tiroler_Weissenbachtal"
-    defaultVehicleDir = temp_dir / "defaultVehicles"
+                elif defaultVehicleIndex == 2:
+                    url2 = "https://cloud.bayerngamers.de/index.php/s/tiwz5qD4cH385j5/download/placeables_vehicles_Hey_and_forage.zip"
 
-    print("\nEnt-zippe Dateien. Bite warten... ")
+        if url2 is None:
+            print("Fehler: URL für defaultVehicle.xml nicht gesetzt! Beende Programm...")
+            shutil.rmtree(temp_dir)
+            exit(1)
 
-    with zipfile.ZipFile(mapPath, 'r') as mapFile:
-        mapFile.extractall(temp_dir / "FS22_Tiroler_Weissenbachtal")
+        print("\nDownloading defaultVehicle.xml.")
+        defaultVehiclePath = download(url2, temp_dir / "defaultVehicles.zip")
 
-    with zipfile.ZipFile(defaultVehiclePath, 'r') as defaultVehicleFile:
-        defaultVehicleFile.extractall(temp_dir / "defaultVehicles")
+        mapDir = temp_dir / "FS22_Tiroler_Weissenbachtal"
+        defaultVehicleDir = temp_dir / "defaultVehicles"
 
-    print("Fertig!")
+        print("\nEnt-zippe Dateien. Bite warten... ")
 
-    #os.listdir(defaultVehicleDir)
-    #shutil.copytree(defaultVehicleDir, mapDir)
-    distutils.dir_util.copy_tree(defaultVehicleDir.__str__(), mapDir.__str__())
+        with zipfile.ZipFile(mapPath, 'r') as mapFile:
+            mapFile.extractall(temp_dir / "FS22_Tiroler_Weissenbachtal")
 
-    print("\nZippe FS22_Tiroler_Weissenbachtal. Bitte warten... ", end="")
+        with zipfile.ZipFile(defaultVehiclePath, 'r') as defaultVehicleFile:
+            defaultVehicleFile.extractall(temp_dir / "defaultVehicles")
 
-    newMapFile = temp_dir / "out" / "FS22_Tiroler_Weissenbachtal.zip"
-    shutil.make_archive(newMapFile.__str__().replace(".zip", ""), "zip", mapDir)
+        print("Fertig!")
 
-    print("Fertig!")
+        # os.listdir(defaultVehicleDir)
+        # shutil.copytree(defaultVehicleDir, mapDir)
+        distutils.dir_util.copy_tree(defaultVehicleDir.__str__(), mapDir.__str__())
 
-    print("\nLade FS22_Stepa_Crane herunter...")
-    craneURL = "https://cloud.bayerngamers.de/index.php/s/Xj8RTyS9y3LwRXW/download/FS22_Stepa_Crane.zip"
-    cranePath = download(craneURL, temp_dir / "FS22_Stepa_Crane.zip")
+        print("\nZippe FS22_Tiroler_Weissenbachtal. Bitte warten... ", end="")
 
-    userPath = os.path.expanduser('~')
-    gameSettingsPath = os.path.join(userPath, "Documents", "My Games", "FarmingSimulator2022", "gameSettings.xml")
+        newMapFile = temp_dir / "out" / "FS22_Tiroler_Weissenbachtal.zip"
+        shutil.make_archive(newMapFile.__str__().replace(".zip", ""), "zip", mapDir)
 
-    file = open(gameSettingsPath, "rb")
-    tree = et.parse(file)
-    root = tree.getroot()
+        print("Fertig!")
 
-    modsDirOverride = root.find("modsDirectoryOverride")
-    modsPath = Path(os.path.join(userPath, "Documents", "My Games", "FarmingSimulator2022", "mods"))
+        print("\nLade FS22_Stepa_Crane herunter...")
+        craneURL = "https://cloud.bayerngamers.de/index.php/s/Xj8RTyS9y3LwRXW/download/FS22_Stepa_Crane.zip"
+        cranePath = download(craneURL, temp_dir / "FS22_Stepa_Crane.zip")
 
-    if modsDirOverride is not None:
-        customModsPathEnabled = modsDirOverride.get("active") == "true"
-        if customModsPathEnabled == True:
-            modsPath = Path(modsDirOverride.get("directory"))
+        userPath = os.path.expanduser('~')
+        gameSettingsPath = os.path.join(userPath, "Documents", "My Games", "FarmingSimulator2022", "gameSettings.xml")
 
-    print(f"\nVerschiebe Dateien in Modordner: {modsPath}")
+        file = open(gameSettingsPath, "rb")
+        tree = et.parse(file)
+        root = tree.getroot()
 
-    shutil.move(cranePath, modsPath / "FS22_Stepa_Crane.zip")
-    shutil.move(newMapFile, modsPath / "FS22_Tiroler_Weissenbachtal.zip")
+        modsDirOverride = root.find("modsDirectoryOverride")
+        modsPath = Path(os.path.join(userPath, "Documents", "My Games", "FarmingSimulator2022", "mods"))
 
-    file.close()
-    input("Drücke ENTER zum beenden...")
-    shutil.rmtree(temp_dir)
+        if modsDirOverride is not None:
+            customModsPathEnabled = modsDirOverride.get("active") == "true"
+            if customModsPathEnabled == True:
+                modsPath = Path(modsDirOverride.get("directory"))
+
+        print(f"\nVerschiebe Dateien in Modordner: {modsPath}")
+
+        shutil.move(cranePath, modsPath / "FS22_Stepa_Crane.zip")
+        shutil.move(newMapFile, modsPath / "FS22_Tiroler_Weissenbachtal.zip")
+
+        file.close()
+        input("Drücke ENTER zum beenden...")
+        shutil.rmtree(temp_dir)
+
+    except KeyboardInterrupt:
+        shutil.rmtree(temp_dir)
+        input("Drücke ENTER zum beenden...")
+        exit(0)
 
 
 if __name__ == '__main__':
     main()
-

@@ -70,7 +70,9 @@ def main():
                 url2 = "https://cloud.bayerngamers.de/index.php/s/tiwz5qD4cH385j5/download/placeables_vehicles_Hey_and_forage.zip"
 
     if url2 is None:
-        print("Error: Unable to find url to download defaultVehicle.xml")
+        print("Error: Unable to find url to download defaultVehicle.xml! Quitting...")
+        shutil.rmtree(temp_dir)
+        exit(1)
 
     print("\nDownloading defaultVehicle.xml.")
     defaultVehiclePath = download(url2, temp_dir / "defaultVehicles.zip")
